@@ -148,9 +148,10 @@ export default function App() {
         setResult(text);
       });
       await saveSearch(user.uid, query, searchResult);
-    } catch (error) {
+    } catch (error: any) {
       console.error(error);
-      setResult("Sorry, something went wrong with the search. Please try again.");
+      const errorMessage = error?.message || "Sorry, something went wrong with the search. Please try again.";
+      setResult(`⚠️ **Synthesis Error**: ${errorMessage}\n\nPlease check your internet connection or try a less complex query. If this persists, the Neural Engine might be under high load.`);
     } finally {
       setIsSearching(false);
     }
