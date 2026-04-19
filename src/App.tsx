@@ -3,7 +3,30 @@ import { onAuthStateChanged, User } from 'firebase/auth';
 import { doc, getDoc, onSnapshot } from 'firebase/firestore';
 import { auth, db, signInWithGoogle, deductCredit, saveSearch } from './lib/firebase';
 import { performAgenticSearch } from './services/geminiService';
-import { Search, Sparkles, User as UserIcon, LogOut, History, Zap, Shield, Globe, ArrowRight, Loader2 } from 'lucide-react';
+import { 
+  Search, 
+  Sparkles, 
+  User as UserIcon, 
+  LogOut, 
+  History, 
+  Zap, 
+  Shield, 
+  Globe, 
+  ArrowRight, 
+  Loader2,
+  ChevronDown,
+  Download,
+  Copy,
+  Maximize2,
+  ExternalLink,
+  Menu,
+  X,
+  Plus,
+  Terminal,
+  Activity,
+  Cpu,
+  Layers
+} from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import ReactMarkdown from 'react-markdown';
 import { clsx, type ClassValue } from 'clsx';
@@ -12,6 +35,64 @@ import { twMerge } from 'tailwind-merge';
 // UI Utility
 function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
+}
+
+function CodeCanvas({ code }: { code: string }) {
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText(code);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  const handleDownload = () => {
+    const blob = new Blob([code], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `genspark-agent-export-${Date.now()}.txt`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
+  return (
+    <div className="relative my-8 group min-w-0">
+      <div className="flex items-center justify-between px-5 py-3 h-12 bg-[#1e1e1e] border-x border-t border-white/5 rounded-t-2xl">
+        <div className="flex items-center gap-2">
+          <div className="flex gap-1.5 px-1">
+            <div className="w-3 h-3 rounded-full bg-[#ff5f56]" />
+            <div className="w-3 h-3 rounded-full bg-[#ffbd2e]" />
+            <div className="w-3 h-3 rounded-full bg-[#27c93f]" />
+          </div>
+          <span className="ml-3 text-[11px] font-mono text-white/40 uppercase tracking-widest leading-none">Code Canvas</span>
+        </div>
+        <div className="flex items-center gap-1.5">
+          <button 
+            onClick={handleCopy}
+            className="p-1.5 hover:bg-white/5 rounded-md transition-colors text-white/60 hover:text-white flex items-center gap-2 text-[10px] font-bold uppercase tracking-wider"
+          >
+            {copied ? <Zap className="w-3 h-3 text-yellow-500 fill-yellow-500" /> : <Copy className="w-3 h-3" />}
+            {copied ? 'Copied' : 'Copy'}
+          </button>
+          <button 
+            onClick={handleDownload}
+            className="p-1.5 hover:bg-white/5 rounded-md transition-colors text-white/60 hover:text-white flex items-center gap-2 text-[10px] font-bold uppercase tracking-wider"
+          >
+            <Download className="w-3 h-3" />
+            Export
+          </button>
+        </div>
+      </div>
+      <div className="bg-[#0f0f10] border-x border-b border-white/5 rounded-b-2xl p-6 overflow-x-auto no-scrollbar shadow-2xl">
+        <pre className="text-[13px] font-mono leading-relaxed text-[#d4d4d4]">
+          <code>{code}</code>
+        </pre>
+      </div>
+    </div>
+  );
 }
 
 export default function App() {
@@ -141,16 +222,22 @@ export default function App() {
             </div>
             
             {!result && !isSearching && (
-              <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-6 w-full">
+              <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-8 w-full">
                 {[
-                  { icon: "⚡", title: "Instant Research", desc: "Turn any prompt into a fully interactive, research-backed report." },
-                  { icon: "🤖", title: "Smart Flash", desc: "Our proprietary Flash engine analyzes queries in milliseconds." },
-                  { icon: "🌐", title: "Web Intelligence", desc: "Live browsing ensures information is never outdated." }
+                  { icon: <Terminal className="w-5 h-5" />, title: "Agentic Logic", desc: "Autonomous agents chain reasoning to solve multi-step research tasks." },
+                  { icon: <Activity className="w-5 h-5" />, title: "Real-time Flux", desc: "Proprietary Flash engine scrapes 100+ sources per second." },
+                  { icon: <Cpu className="w-5 h-5" />, title: "Neural Synthesis", desc: "Aggregated data is synthesized using our high-density model." }
                 ].map((f, i) => (
-                  <div key={i} className="frosted-glass p-6 rounded-2xl group hover:border-accent/30 transition-all">
-                    <div className="w-10 h-10 bg-accent/20 rounded-lg flex items-center justify-center text-xl mb-4 group-hover:scale-110 transition-transform">{f.icon}</div>
-                    <h3 className="font-bold text-white mb-2">{f.title}</h3>
-                    <p className="text-sm text-text-dim leading-relaxed">{f.desc}</p>
+                  <div key={i} className="frosted-glass p-8 rounded-[32px] group/card hover:bg-white/[0.04] transition-all relative overflow-hidden">
+                    <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-accent/20 to-transparent opacity-0 group-hover/card:opacity-100 transition-opacity" />
+                    <div className="w-12 h-12 bg-white/5 rounded-2xl flex items-center justify-center text-accent mb-6 group-hover/card:scale-110 transition-transform border border-white/5">
+                      {f.icon}
+                    </div>
+                    <h3 className="text-lg font-bold text-white mb-3 tracking-tight">{f.title}</h3>
+                    <p className="text-sm text-text-dim leading-relaxed font-medium">{f.desc}</p>
+                    <div className="mt-6 flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-accent opacity-0 group-hover/card:opacity-100 transition-all translate-y-2 group-hover/card:translate-y-0">
+                      Learn More <ArrowRight className="w-3 h-3" />
+                    </div>
                   </div>
                 ))}
               </div>
@@ -181,22 +268,78 @@ export default function App() {
                 )}
                 
                 {result && (
-                  <div className="frosted-glass rounded-3xl p-8 md:p-12 shadow-2xl overflow-hidden relative border-white/5">
-                    <div className="absolute top-0 right-0 w-64 h-64 bg-accent/5 blur-[100px] -z-10" />
-                    <ReactMarkdown 
-                      components={{
-                        h1: ({node, ...props}) => <h1 className="text-4xl font-extrabold mb-8 text-white tracking-tight" {...props} />,
-                        h2: ({node, ...props}) => <h2 className="text-2xl font-bold mt-12 mb-4 text-accent/80 flex items-center gap-2" {...props} />,
-                        h3: ({node, ...props}) => <h3 className="text-xl font-bold mt-8 mb-3 text-white border-b border-white/5 pb-2 inline-block" {...props} />,
-                        p: ({node, ...props}) => <p className="text-slate-300 leading-relaxed mb-6 text-lg" {...props} />,
-                        ul: ({node, ...props}) => <ul className="list-disc pl-6 mb-8 space-y-3 text-slate-300" {...props} />,
-                        ol: ({node, ...props}) => <ol className="list-decimal pl-6 mb-8 space-y-3 text-slate-300" {...props} />,
-                        code: ({node, ...props}) => <code className="bg-accent/10 text-accent rounded px-1.5 py-0.5 text-sm font-mono border border-accent/20" {...props} />,
-                        blockquote: ({node, ...props}) => <blockquote className="border-l-4 border-accent pl-6 italic text-slate-400 my-8 py-2 bg-accent/5 rounded-r-lg" {...props} />
-                      }}
-                    >
-                      {result}
-                    </ReactMarkdown>
+                  <div className="w-full max-w-5xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-8 duration-1000">
+                    {/* Tech Insight Header Stats */}
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                       {[
+                         { label: "Neural Load", val: "1.4ms", icon: <Cpu className="w-3 h-3" /> },
+                         { label: "Sources Scanned", val: "142", icon: <Globe className="w-3 h-3" /> },
+                         { label: "Confidence", val: "98.2%", icon: <Shield className="w-3 h-3" /> },
+                         { label: "Token Flux", val: "42k/s", icon: <Activity className="w-3 h-3" /> }
+                       ].map((s, i) => (
+                         <div key={i} className="frosted-glass px-5 py-3 rounded-2xl flex items-center justify-between border-white/5 bg-white/[0.02]">
+                            <div className="flex items-center gap-2 opacity-40">
+                               {s.icon}
+                               <span className="text-[10px] font-bold uppercase tracking-widest">{s.label}</span>
+                            </div>
+                            <span className="text-xs font-mono font-bold text-accent">{s.val}</span>
+                         </div>
+                       ))}
+                    </div>
+
+                    <div className="frosted-glass rounded-[40px] overflow-hidden shadow-[0_40px_100px_-20px_rgba(0,0,0,0.8)] border border-white/5 relative">
+                      {/* Mac Window Header */}
+                      <div className="bg-white/[0.03] border-b border-white/5 px-8 py-5 flex items-center justify-between backdrop-blur-3xl">
+                         <div className="flex items-center gap-4">
+                            <div className="flex gap-2">
+                              <div className="w-3.5 h-3.5 rounded-full bg-[#ff5f56]/80 flex items-center justify-center text-[8px] font-bold text-black/40">×</div>
+                              <div className="w-3.5 h-3.5 rounded-full bg-[#ffbd2e]/80 flex items-center justify-center text-[10px] font-bold text-black/40">-</div>
+                              <div className="w-3.5 h-3.5 rounded-full bg-[#27c93f]/80 flex items-center justify-center text-[6px] font-bold text-black/40">⤢</div>
+                            </div>
+                            <div className="h-4 w-[1px] bg-white/10 mx-2" />
+                            <div className="flex items-center gap-2 text-[10px] font-black text-white/40 uppercase tracking-[3px]">
+                               <Layers className="w-3 h-3" />
+                               Neural Synthesis Result
+                            </div>
+                         </div>
+                         <div className="flex items-center gap-3">
+                            <div className="px-3 py-1 rounded-full bg-accent/10 border border-accent/20 text-[9px] font-black text-accent uppercase tracking-widest">Live Flow</div>
+                            <button className="p-2 hover:bg-white/5 rounded-xl text-white/40 hover:text-white transition-all active:scale-90">
+                               <Maximize2 className="w-4 h-4" />
+                            </button>
+                         </div>
+                      </div>
+
+                      <div className="p-10 md:p-20 relative group selection:bg-accent selection:text-white">
+                        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-accent/5 blur-[160px] -z-10" />
+                        <ReactMarkdown 
+                          components={{
+                            h1: ({node, ...props}) => <h1 className="text-5xl font-black mb-12 text-white tracking-[-2px] leading-[1.1]" {...props} />,
+                            h2: ({node, ...props}) => <h2 className="text-2xl font-black mt-20 mb-8 text-accent flex items-center gap-4 uppercase tracking-tight" {...props} />,
+                            h3: ({node, ...props}) => <h3 className="text-xl font-bold mt-12 mb-6 text-white/90 border-l-2 border-accent/30 pl-6" {...props} />,
+                            p: ({node, ...props}) => <p className="text-white/60 leading-relaxed mb-10 text-xl font-medium" {...props} />,
+                            ul: ({node, ...props}) => <ul className="list-disc pl-8 mb-12 space-y-5 text-white/60" {...props} />,
+                            ol: ({node, ...props}) => <ol className="list-decimal pl-8 mb-12 space-y-5 text-white/60" {...props} />,
+                            code: (props: any) => {
+                              const { children, className, node, ...rest } = props;
+                              const match = /language-(\w+)/.exec(className || '');
+                              const isCodeBlock = !props.inline && match; // 'inline' is sometimes missing from types but present in runtime
+                              // Alternative check that works even if 'inline' is missing from props
+                              const isMultiline = String(children).includes('\n') || !!match;
+
+                              if (isMultiline && children) {
+                                return <CodeCanvas code={String(children).replace(/\n$/, '')} />;
+                              }
+                              return <code className="bg-white/10 text-accent rounded-md px-2 py-0.5 text-sm font-mono border border-white/5" {...rest}>{children}</code>
+                            },
+                            blockquote: ({node, ...props}) => <blockquote className="border-l-4 border-accent/50 pl-10 italic text-white/40 my-16 py-6 bg-white/[0.01] rounded-r-[32px] text-2xl font-serif" {...props} />,
+                            hr: () => <hr className="my-20 border-white/5" />
+                          }}
+                        >
+                          {result}
+                        </ReactMarkdown>
+                      </div>
+                    </div>
                   </div>
                 )}
               </motion.div>
@@ -215,19 +358,42 @@ export default function App() {
 
       {/* Header */}
       <nav className="fixed top-0 w-full z-50 frosted-glass border-b border-white/10 px-6 md:px-12 py-5 flex items-center justify-between">
-        <div className="flex items-center gap-2 cursor-pointer group" onClick={() => { setActiveTab('search'); setResult(''); setQuery(''); }}>
-          <div className="w-10 h-10 bg-accent rounded-xl flex items-center justify-center shadow-lg shadow-accent/20 group-hover:scale-110 transition-transform">
-            <Sparkles className="w-6 h-6 text-white" />
+        <div className="flex items-center gap-3 cursor-pointer group" onClick={() => { setActiveTab('search'); setResult(''); setQuery(''); }}>
+          <div className="relative">
+            <div className="w-11 h-11 bg-accent rounded-xl flex items-center justify-center shadow-xl shadow-accent/20 group-hover:scale-110 group-hover:rotate-12 transition-all duration-500">
+              <Zap className="w-6 h-6 text-white fill-white" />
+            </div>
+            <div className="absolute -top-1 -right-1 w-4 h-4 bg-white rounded-full flex items-center justify-center animate-pulse">
+               <div className="w-2 h-2 bg-accent rounded-full" />
+            </div>
           </div>
-          <span className="text-2xl font-black tracking-tighter bg-clip-text text-transparent bg-gradient-to-r from-white to-accent uppercase">GEN AI FLASH</span>
+          <div className="flex flex-col">
+            <span className="text-xl font-black tracking-[-1.5px] bg-clip-text text-transparent bg-gradient-to-br from-white via-white to-accent/60 uppercase leading-none">GEN AI FLASH</span>
+            <span className="text-[10px] font-bold text-accent tracking-[2px] uppercase leading-none mt-1 opacity-60">Neural Engine v3</span>
+          </div>
         </div>
 
-        <div className="hidden lg:flex items-center gap-6 text-xs font-bold tracking-widest uppercase text-text-dim">
-          <button onClick={() => setActiveTab('how-it-works')} className={cn("hover:text-white transition-colors", activeTab === 'how-it-works' && "text-white")}>How It Works</button>
-          <button onClick={() => setActiveTab('guide')} className={cn("hover:text-white transition-colors", activeTab === 'guide' && "text-white")}>Guide</button>
-          <button onClick={() => setActiveTab('speed')} className={cn("hover:text-white transition-colors", activeTab === 'speed' && "text-white")}>Speed</button>
-          <button onClick={() => setActiveTab('faq')} className={cn("hover:text-white transition-colors", activeTab === 'faq' && "text-white")}>FAQ</button>
-          <button onClick={() => setActiveTab('about')} className={cn("hover:text-white transition-colors", activeTab === 'about' && "text-white")}>About</button>
+        <div className="hidden lg:flex items-center gap-10">
+          <button 
+           onClick={() => setActiveTab('search')}
+           className={cn("text-xs font-bold tracking-[2px] uppercase transition-all flex items-center gap-2", activeTab === 'search' ? "text-accent" : "text-white/40 hover:text-white")}
+          >
+            <Plus className="w-4 h-4" /> New Session
+          </button>
+          
+          <div className="relative group/menu">
+            <button className="text-xs font-bold tracking-[2px] uppercase text-white/40 group-hover/menu:text-white transition-all flex items-center gap-2 py-2">
+              Resources <ChevronDown className="w-3 h-3 group-hover/menu:rotate-180 transition-transform" />
+            </button>
+            <div className="absolute top-full right-0 mt-2 w-56 frosted-glass border border-white/5 rounded-2xl p-2 opacity-0 translate-y-2 pointer-events-none group-hover/menu:opacity-100 group-hover/menu:translate-y-0 group-hover/menu:pointer-events-auto transition-all shadow-2xl backdrop-blur-2xl">
+              <button onClick={() => setActiveTab('how-it-works')} className="w-full text-left px-4 py-3 text-[11px] font-bold uppercase tracking-wider text-white/50 hover:text-white hover:bg-white/5 rounded-xl transition-all">How It Works</button>
+              <button onClick={() => setActiveTab('guide')} className="w-full text-left px-4 py-3 text-[11px] font-bold uppercase tracking-wider text-white/50 hover:text-white hover:bg-white/5 rounded-xl transition-all">Agent Guide</button>
+              <button onClick={() => setActiveTab('speed')} className="w-full text-left px-4 py-3 text-[11px] font-bold uppercase tracking-wider text-white/50 hover:text-white hover:bg-white/5 rounded-xl transition-all">Improve Speed</button>
+              <div className="my-2 border-t border-white/5" />
+              <button onClick={() => setActiveTab('faq')} className="w-full text-left px-4 py-3 text-[11px] font-bold uppercase tracking-wider text-white/50 hover:text-white hover:bg-white/5 rounded-xl transition-all">FAQ</button>
+              <button onClick={() => setActiveTab('about')} className="w-full text-left px-4 py-3 text-[11px] font-bold uppercase tracking-wider text-white/50 hover:text-white hover:bg-white/5 rounded-xl transition-all">Our Thesis</button>
+            </div>
+          </div>
         </div>
 
         <div className="flex items-center gap-6">
@@ -459,26 +625,36 @@ function GuideView() {
 
 function SpeedView() {
   return (
-    <div className="max-w-4xl mx-auto space-y-12 animate-in fade-in slide-in-from-bottom-4 duration-500">
-      <h1 className="text-5xl font-black text-center mb-12 uppercase tracking-tight">Improve Search Speed</h1>
+    <div className="max-w-5xl mx-auto space-y-20 animate-in fade-in slide-in-from-bottom-8 duration-700">
+      <div className="text-center space-y-6">
+        <h1 className="text-6xl font-black uppercase tracking-[-2px] leading-none">Optimize Velocity</h1>
+        <p className="text-xl text-text-dim max-w-2xl mx-auto font-medium">Neural Engine tuning for high-frequency search synthesis.</p>
+      </div>
+
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-         <div className="frosted-glass p-8 rounded-3xl space-y-4 border-accent/20">
-            <div className="w-12 h-12 bg-accent/20 rounded-xl flex items-center justify-center text-accent">
-              <Zap className="w-8 h-8" />
+         <div className="frosted-glass p-12 rounded-[48px] space-y-8 border-accent/20 group hover:bg-white/[0.03] transition-all">
+            <div className="w-16 h-16 bg-accent/20 rounded-3xl flex items-center justify-center text-accent shadow-2xl shadow-accent/20 animate-pulse">
+              <Zap className="w-10 h-10 fill-accent" />
             </div>
-            <h3 className="text-2xl font-bold">Parallel Execution</h3>
-            <p className="text-text-dim">By default, Gen AI Flash uses 10+ parallel agents. To improve speed, ensure you have a stable internet connection for the stream to render smoothly.</p>
+            <div className="space-y-4">
+              <h3 className="text-3xl font-bold tracking-tight">Massive Parallelism</h3>
+              <p className="text-text-dim text-lg leading-relaxed">Gen AI Flash deploys 12-24 research agents per query. To maximize performance, ensure your local bandwidth supports high-concurrency WebSocket streams.</p>
+            </div>
          </div>
-         <div className="frosted-glass p-8 rounded-3xl space-y-4">
-            <div className="w-12 h-12 bg-white/10 rounded-xl flex items-center justify-center text-white">
-              <Globe className="w-8 h-8" />
+         <div className="frosted-glass p-12 rounded-[48px] space-y-8 group hover:bg-white/[0.03] transition-all">
+            <div className="w-16 h-16 bg-white/10 rounded-3xl flex items-center justify-center text-white shadow-2xl">
+              <Globe className="w-10 h-10" />
             </div>
-            <h3 className="text-2xl font-bold">Local Cloud Nodes</h3>
-            <p className="text-text-dim">We deploy our research agents to the cloud node closest to the target data, reducing latency significantly compared to standard LLMs.</p>
+            <div className="space-y-4">
+              <h3 className="text-3xl font-bold tracking-tight">Geographic Nodes</h3>
+              <p className="text-text-dim text-lg leading-relaxed">Our agents automatically migrate to edge nodes nearest to the target database. This layer-7 routing reduces synthesis latency by up to 40%.</p>
+            </div>
          </div>
       </div>
-      <div className="text-center p-12 bg-accent/5 rounded-[40px] border border-accent/10">
-        <p className="text-lg text-text-dim italic">"Gen AI Flash is optimized to deliver deep research in under 30 seconds."</p>
+
+      <div className="frosted-glass p-12 rounded-[48px] border-white/5 text-center relative overflow-hidden">
+        <div className="absolute top-0 left-0 w-full h-full bg-accent/5 -z-10 animate-pulse" />
+        <p className="text-2xl font-serif italic text-white/60">"Engineered for sub-30 second deep synthesis across the global web."</p>
       </div>
     </div>
   );
