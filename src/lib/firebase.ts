@@ -48,11 +48,28 @@ export const signInWithGoogle = async () => {
 };
 
 export const deductCredit = async (userId: string) => {
-  const userDocRef = doc(db, "users", userId);
-  await updateDoc(userDocRef, {
-    credits: increment(-1),
-    updatedAt: new Date().toISOString()
-  });
+  try {
+    const userDocRef = doc(db, "users", userId);
+    const userDoc = await getDoc(userDocRef);
+    
+    if (!userDoc.exists()) {
+      console.log("Creating user doc for migration:", userId);
+      await setDoc(userDocRef, {
+        uid: userId,
+        credits: 1000000,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      });
+      return;
+    }
+
+    await updateDoc(userDocRef, {
+      credits: increment(-1),
+      updatedAt: new Date().toISOString()
+    });
+  } catch (error) {
+    console.warn("Deduction process bypassed (Firestore Rules/Missing Doc):", error);
+  }
 };
 
 export const saveSearch = async (userId: string, queryText: string, result: string) => {

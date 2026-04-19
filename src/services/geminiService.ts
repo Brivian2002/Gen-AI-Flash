@@ -19,54 +19,48 @@ function getAI() {
 export async function performAgenticSearch(query: string, streamCallback?: (text: string) => void) {
   try {
     const ai = getAI();
-    console.log("Starting agentic search for:", query);
+    console.log("Gemini Engine Triggered for:", query);
     
     let responseStream;
+    const prompt = `Perform deep research on: "${query}". Provide a well-structured, factual response using markdown. Summary, Key Facts, and Analysis sections are required. Cite sources if possible [1].`;
+
     try {
+      // Primary attempt with Agentic Tools (Flash supports this)
       responseStream = await ai.models.generateContentStream({
         model: "gemini-3-flash-preview",
-        contents: [
-          {
-            role: "user",
-            parts: [{ text: `You are an agentic search engine similar to GenSpark. Perform a deep research on the following query: "${query}". Provide a comprehensive, well-structured, and factual response. Use markdown for better readability. Cite potential sources if possible in text (e.g., [1]). Summary, Key Facts, and Deep Analysis sections are required. Be highly specific and technical where appropriate.` }]
-          }
-        ],
+        contents: [{ parts: [{ text: prompt }] }],
         config: {
           tools: [{ googleSearch: {} }]
         }
       });
-    } catch (innerError) {
-      console.warn("Search with tools failed, falling back to standard generation:", innerError);
-      // Fallback: try without tools if the free tier key doesn't support them or quota is hit
+    } catch (innerError: any) {
+      console.warn("Agentic Google Search failed, using standard synthesis:", innerError);
+      // Fallback: Standard high-density synthesis (no tools)
       responseStream = await ai.models.generateContentStream({
         model: "gemini-3-flash-preview",
-        contents: [
-          {
-            role: "user",
-            parts: [{ text: `Perform deep research and analysis on: "${query}". Even without live search tools, provide the most accurate and detailed report possible based on your training data. Use markdown, citations, and structured sections (Summary, Key Facts, Analysis).` }]
-          }
-        ]
+        contents: [{ parts: [{ text: prompt + " (Analyze based on your neural training data)" }] }]
       });
     }
 
     let fullText = "";
     for await (const chunk of responseStream) {
-      const chunkText = chunk.text;
-      if (chunkText) {
-        fullText += chunkText;
-        if (streamCallback) {
-          streamCallback(fullText);
-        }
+      if (chunk.text) {
+        fullText += chunk.text;
+        if (streamCallback) streamCallback(fullText);
       }
     }
 
-    if (!fullText) {
-      throw new Error("Empty response from AI");
-    }
-
+    if (!fullText) throw new Error("Synthesis Engine returned no data. Your API Key may have reached its quota or is restricted in your region.");
     return fullText;
-  } catch (error) {
-    console.error("Critical error in agentic search:", error);
-    throw error;
+
+  } catch (error: any) {
+    console.error("Critical Gemini Error:", error);
+    // Extract meaningful error info for the user
+    let userFriendlyError = "Neural Engine Failure";
+    if (error?.message?.includes("quota")) userFriendlyError = "API Quota Exceeded (Free Tier Limit)";
+    if (error?.message?.includes("API key")) userFriendlyError = "Invalid or Restricted Gemini API Key";
+    if (error?.message?.includes("location")) userFriendlyError = "Service unavailable in your geographic region";
+    
+    throw new Error(`${userFriendlyError}: ${error.message || 'Unknown protocol error'}`);
   }
 }

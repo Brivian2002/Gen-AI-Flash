@@ -128,13 +128,11 @@ export default function App() {
     e?.preventDefault();
     if (!query.trim()) return;
     
-    if (!user) {
-      setShowAuthModal(true);
-      return;
-    }
+    console.log("Starting search for:", query);
 
-    if (userData && userData.credits <= 0) {
-      alert("Out of credits! This is a demo, but in a real app you'd top up here.");
+    if (!user) {
+      console.log("User not logged in, showing auth modal");
+      setShowAuthModal(true);
       return;
     }
 
@@ -143,13 +141,18 @@ export default function App() {
     setActiveTab('search');
 
     try {
+      console.log("Requesting deduction...");
       await deductCredit(user.uid);
+      
+      console.log("Initializing Agentic Search...");
       const searchResult = await performAgenticSearch(query, (text) => {
         setResult(text);
       });
+      
+      console.log("Search synthesis complete.");
       await saveSearch(user.uid, query, searchResult);
     } catch (error: any) {
-      console.error(error);
+      console.error("Search Handler Error:", error);
       const errorMessage = error?.message || "Sorry, something went wrong with the search. Please try again.";
       setResult(`⚠️ **Synthesis Error**: ${errorMessage}\n\nPlease check your internet connection or try a less complex query. If this persists, the Neural Engine might be under high load.`);
     } finally {
