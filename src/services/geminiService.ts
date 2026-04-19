@@ -4,16 +4,11 @@ let genAI: GoogleGenAI | null = null;
 
 function getAI() {
   if (!genAI) {
-    // Primary: User provided key
-    let apiKey = "AIzaSyCko3rInG1WK-lZInN6N2cEnD-Px3RKAPI";
-    
-    // Fallback to environment if hardcoded one is somehow empty
-    if (!apiKey) {
-      apiKey = typeof process !== 'undefined' ? process.env.GEMINI_API_KEY : (import.meta as any).env.VITE_GEMINI_API_KEY;
-    }
+    // Standard: Use the environment variable managed by AI Studio
+    const apiKey = typeof process !== 'undefined' ? process.env.GEMINI_API_KEY : (import.meta as any).env.VITE_GEMINI_API_KEY;
     
     if (!apiKey) {
-      throw new Error("GEMINI_API_KEY is missing. Please ensure it is set in your environment variables.");
+      throw new Error("GEMINI_API_KEY is missing. Please provide a valid API key in the 'Settings' menu or through environment variables.");
     }
     genAI = new GoogleGenAI({ apiKey });
   }
