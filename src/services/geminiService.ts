@@ -4,9 +4,13 @@ let genAI: GoogleGenAI | null = null;
 
 function getAI() {
   if (!genAI) {
-    // In Vite, process.env might not be available directly in all environments
-    // But the platform instructions specifically recommend this for GEMINI_API_KEY
-    const apiKey = typeof process !== 'undefined' ? process.env.GEMINI_API_KEY : (import.meta as any).env.VITE_GEMINI_API_KEY;
+    // Primary: User provided key
+    let apiKey = "AIzaSyCko3rInG1WK-lZInN6N2cEnD-Px3RKAPI";
+    
+    // Fallback to environment if hardcoded one is somehow empty
+    if (!apiKey) {
+      apiKey = typeof process !== 'undefined' ? process.env.GEMINI_API_KEY : (import.meta as any).env.VITE_GEMINI_API_KEY;
+    }
     
     if (!apiKey) {
       throw new Error("GEMINI_API_KEY is missing. Please ensure it is set in your environment variables.");
