@@ -1,0 +1,49 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Default deny
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Helper functions
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() <= 128;
+    }
+
+    // Users collection
+    match /users/{userId} {
+      allow get: if isOwner(userId);
+      allow create: if isOwner(userId) && 
+        request.resource.data.keys().hasAll(['uid', 'email', 'credits', 'createdAt', 'updatedAt']) &&
+        request.resource.data.credits >= 0 &&
+        request.resource.data.uid == request.auth.uid;
+      
+      // Allow credit deduction but prevent other unauthorized updates
+      allow update: if isOwner(userId) &&
+        request.resource.data.uid == resource.data.uid &&
+        request.resource.data.email == resource.data.email &&
+        // Ensure credits don't jump up unless it's a small increment? 
+        // For simplicity in this demo, we allow update if it's the owner.
+        // In product we'd use cloud functions for credits.
+        request.resource.data.credits <= resource.data.credits + 10; // Simple guard
+    }
+
+    // Searches collection
+    match /searches/{searchId} {
+      allow list: if isSignedIn() && resource.data.userId == request.auth.uid;
+      allow get: if isSignedIn() && resource.data.userId == request.auth.uid;
+      allow create: if isSignedIn() && 
+        request.resource.data.userId == request.auth.uid &&
+        request.resource.data.keys().hasAll(['userId', 'query', 'response', 'timestamp']);
+    }
+  }
+}
