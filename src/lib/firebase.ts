@@ -1,14 +1,15 @@
 import { initializeApp } from "firebase/app";
 import { getAuth, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 import { getFirestore, doc, getDoc, setDoc, updateDoc, increment, collection, addDoc, query, where, orderBy, limit, getDocs } from "firebase/firestore";
+// Your web app's Firebase configuration
 const firebaseConfig = {
-  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
-  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
-  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
-  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
-  appId: import.meta.env.VITE_FIREBASE_APP_ID,
-  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID
+  apiKey: "AIzaSyBMVmWK63oIwTFGbFlk83CXElw8RCN7HKY",
+  authDomain: "data-zone-ghana.firebaseapp.com",
+  projectId: "data-zone-ghana",
+  storageBucket: "data-zone-ghana.firebasestorage.app",
+  messagingSenderId: "646703313086",
+  appId: "1:646703313086:web:941679243ebd44fb0a2eef",
+  measurementId: "G-XYRRGDZ6RS"
 };
 
 const app = initializeApp(firebaseConfig);
