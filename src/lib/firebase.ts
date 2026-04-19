@@ -73,12 +73,17 @@ export const deductCredit = async (userId: string) => {
 };
 
 export const saveSearch = async (userId: string, queryText: string, result: string) => {
-  await addDoc(collection(db, "searches"), {
-    userId,
-    query: queryText,
-    response: result,
-    timestamp: new Date().toISOString()
-  });
+  try {
+    await addDoc(collection(db, "searches"), {
+      userId,
+      query: queryText,
+      response: result,
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    console.error("Firestore Save Failed:", error);
+    throw error;
+  }
 };
 
 export const getSearchHistory = async (userId: string) => {

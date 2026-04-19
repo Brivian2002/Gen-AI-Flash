@@ -149,12 +149,25 @@ export default function App() {
         setResult(text);
       });
       
-      console.log("Search synthesis complete.");
-      await saveSearch(user.uid, query, searchResult);
+      console.log("Search synthesis complete. Attempting to save to history...");
+      try {
+        await saveSearch(user.uid, query, searchResult);
+        console.log("History saved successfully.");
+      } catch (dbError: any) {
+        console.warn("History Save Ignored (Firestore Permissions):", dbError);
+        // We don't block the user if saving to history fails, 
+        // but we log it for debugging
+      }
     } catch (error: any) {
       console.error("Search Handler Error:", error);
-      const errorMessage = error?.message || "Sorry, something went wrong with the search. Please try again.";
-      setResult(`⚠️ **Synthesis Error**: ${errorMessage}\n\nPlease check your internet connection or try a less complex query. If this persists, the Neural Engine might be under high load.`);
+      const errorMessage = error?.message || "Internal Neural Engine error";
+      
+      // Check if it's a Firestore error that leaked out
+      if (errorMessage.includes("insufficient permissions")) {
+         setResult(`⚠️ **Database Permission Error**: Please ensure Firestore is enabled and rules are deployed in your Firebase console for project **data-zone-ghana**.`);
+      } else {
+         setResult(`⚠️ **Synthesis Error**: ${errorMessage}\n\nPlease check your internet connection or try a less complex query.`);
+      }
     } finally {
       setIsSearching(false);
     }

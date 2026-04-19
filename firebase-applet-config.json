@@ -1,10 +1,10 @@
 {
-  "projectId": "gen-lang-client-0941428434",
-  "appId": "1:220025474657:web:93f91de9b33f3cdeb6e420",
-  "apiKey": "AIzaSyBXmKn4eKjdf-JdiQO3Ztp5f4IGUQFfdEM",
-  "authDomain": "gen-lang-client-0941428434.firebaseapp.com",
-  "firestoreDatabaseId": "ai-studio-a6178e56-9131-445c-bf4c-edbaaec59b6c",
-  "storageBucket": "gen-lang-client-0941428434.firebasestorage.app",
-  "messagingSenderId": "220025474657",
-  "measurementId": ""
+  "projectId": "data-zone-ghana",
+  "appId": "1:646703313086:web:941679243ebd44fb0a2eef",
+  "apiKey": "AIzaSyBMVmWK63oIwTFGbFlk83CXElw8RCN7HKY",
+  "authDomain": "data-zone-ghana.firebaseapp.com",
+  "firestoreDatabaseId": "(default)",
+  "storageBucket": "data-zone-ghana.firebasestorage.app",
+  "messagingSenderId": "646703313086",
+  "measurementId": "G-XYRRGDZ6RS"
 }
